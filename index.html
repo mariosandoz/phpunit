@@ -169,8 +169,6 @@ php artisan make:test AdminControllerTest
 PHPUnit has few conventions to make life easier
   * Your tests should mirror codebase directly
 
-  * Test file must match the file that they are testing, with `Test` appended
-
   ```remark
   /laravel/app/Http/Controllers/Auth.php
   /laravel/app/Http/Controllers/Password.php
@@ -182,14 +180,74 @@ PHPUnit has few conventions to make life easier
   /laravel/tests/Http/Controllers/PasswordTest.php
 
   ```
+  * Test file must match the file that they are testing, with `Test` appended
 
   * Classnames are exactly same as filenames
+]
 
-  * Method test name should start with `test` in lowercase and should be descriptive and contain 
-  method name being tested
+---
+.left-column[
+  ##Conventions
+]
+.right-column[
+Cont’d
+  * Method test name should start with `test` in lowercase
+
+  * Method test name should be descriptive and contain method name being tested. 
+    
+    For example method `add()` in class `Calculator` and we want to test that parameter
+    is string, you would name your method `testAddStringParameterGiven()`
+
+  * Methods in PHPUnit must be public
 ]
 ---
+.left-column[
+  ###First Test
+]
+.right-column[
+  Our first test will be short but it will introduce to the very minimum required
+  * Go to terminal, create new test using artisan command
+  ```remark
+    php artisan make:test StupidTest
+  ```
 
+  ```remark
+  use Illuminate\Foundation\Testing\WithoutMiddleware;
+  use Illuminate\Foundation\Testing\DatabaseMigrations;
+  use Illuminate\Foundation\Testing\DatabaseTransactions;
+
+  class StupidTest extends TestCase
+  {
+      public function testTrueIsTrue()
+      {
+        $this->assertTrue(true);
+      }
+    }
+  ```
+This is nothing special - just your run of the mill class. Notice how we are already following conventions, though.
+]
+---
+.left-column[
+  ###First Test
+]
+.right-column[
+To run your phpunit, from project root run `phpunit`
+```remark
+PHPUnit 5.1.3 by Sebastian Bergmann and contributors.
+
+.                                        1 / 1 (100%)
+
+Time: 246 ms, Memory: 10.25Mb
+
+OK (1 tests, 1 assertions)
+
+```
+You ran a single test file, `1 test`, with a single assertion `1 assertion`.
+
+Congratulations, you are now one step closer to joining the ranks of tester!
+
+]
+---
 name: last-page
 template: inverse
 
