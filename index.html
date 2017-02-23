@@ -248,6 +248,320 @@ Congratulations, you are now one step closer to joining the ranks of tester!
 
 ]
 ---
+.left-column[
+  ###Assertions
+]
+.right-column[
+What is an assertion ?
+
+Assertion is meaning that an assertion verifies a statement made equals true.
+
+From our first test, we want to test that if `true` is `true`
+
+    public function testTrueIsTrue()
+    {
+        $this->assertTrue(true);
+    }
+if we pass the `false` value as the parameter, it will be failed
+
+There are about 90 assertions ships in PHPUnit and we don't need to memorize any of them.
+You also do not need to use them all. 
+Most of the time you will only use `assertArrayHasKey()`, `assertEquals()`, `assertFalse()`, `assertSame()` and `assertTrue()`
+]
+---
+.left-column[
+  ###First Useful Test
+]
+.right-column[
+Our first test we will create a Calculator class that has method `add`.
+
+This method will turn the sum of two numbers
+
+Please keep in mind the first thing to do is create the test cases, not the method itself.
+
+```remark
+class CalculatorTest extends TestCase
+{
+    public function testAddIntegerValue()
+    {
+        $calc = new App\Http\Controllers\Calculator();
+        $resultAdd = $calc->add(5, 6);
+
+        $this->assertEquals($resultAdd, 11,
+         "Test testAddIntegerValue failed");
+    }
+}
+```
+Run your `phpunit`
+]
+---
+.left-column[
+  ###First Useful Test
+]
+.right-column[
+###ERROR
+```remark
+PHPUnit 4.8.21 by Sebastian Bergmann and contributors.
+PHP Fatal error:  Class 'Calculator' not found in /home/maryo/gitlab/laravel/tests/CalculatorTest.php on line 11
+PHP Stack trace:
+PHP   1. {main}() /usr/local/bin/phpunit:0
+PHP   2. PHPUnit_TextUI_Command::main() /usr/local/bin/phpunit:545
+.........
+                                                     
+[Symfony\Component\Debug\Exception\FatalErrorException]  
+Class 'Calculator' not found                             
+```
+###That is expected
+Create your class `Calculator` then
+```remark
+public function add($number1, $number2)
+{
+    return $number1 + $number2;
+}                      
+```
+Run your `phpunit`
+]
+---
+.left-column[
+  ###First Useful Test
+]
+.right-column[
+###Success
+```remark
+PHPUnit 4.8.21 by Sebastian Bergmann and contributors.
+
+.
+
+Time: 169 ms, Memory: 24.00Mb
+
+OK (1 test, 1 assertion)
+
+```
+From here we can move on with more scenarios
+
+More scenarios is needed to cover the possibility
+]
+---
+.left-column[
+  ###First Useful Test
+]
+.right-column[
+A proper test suite makes sure all your possible bases are covered, 
+so create tests for more scenarios: 
+```remark
+public function testAddStringValue()
+{
+    $calc = new App\Http\Controllers\Calculator();
+    $resultAdd = $calc->add('5', '6');
+    $this->assertEquals($resultAdd, null, 
+        "Test testAddStringValue failed");
+}
+public function testAddNullValue()
+{
+    $calc = new App\Http\Controllers\Calculator();
+    $resultAdd = $calc->add(null, null);
+    $this->assertEquals($resultAdd, null, 
+        "Test testAddNullValue failed");
+}
+public function testAddArrayValue()
+{
+    $calc = new App\Http\Controllers\Calculator();
+    $resultAdd = $calc->add([], []);
+    $this->assertEquals($resultAdd, null, 
+        "Test testAddArrayValue failed");
+}
+
+```
+After that improve your code to follow your test case
+
+Run your `phpunit`
+]
+---
+.left-column[
+  ###First Useful Test
+]
+.right-column[
+###Success
+```remark
+PHPUnit 4.8.21 by Sebastian Bergmann and contributors.
+....
+
+Time: 208 ms, Memory: 24.25Mb
+
+OK (4 tests, 4 assertions)
+
+```
+##Code duplication !!
+It fails the `DRY principle`
+]
+---
+.left-column[
+  ###@dataProvider
+]
+.right-column[
+Thankfully, PHPUnit has a built-in tool in the form of the `dataProvider` annotation.
+
+Instead of creating multiple test methods, you simply create a single method that accepts parameters corresponding to the data that is variable between tests.
+
+Then, reate a data provider method to provide that data
+]
+---
+.left-column[
+  ###@dataProvider
+]
+.right-column[
+This is the result with `dataProvider`
+
+```remark
+/**
+ * @param type $number1
+ * @param type $number2
+ * @param type $expected
+ * @dataProvider providerTestAddValue
+ */
+public function testAddValue($number1, $number2, $expected)
+{
+    $calc = new App\Http\Controllers\Calculator();
+    $resultAdd = $calc->add($number1, $number2);
+    $this->assertEquals($resultAdd, $expected, 
+            "Test testAddValue failed");
+}
+/**
+ * Data provider for testAddValue method
+ * @return type
+ */
+public function providerTestAddValue()
+{
+    return[
+        [5, 6, 11],
+        ['5', '6', null],
+        [null, null, null],
+        [[], [], null],
+    ];
+}
+```
+Run your `phpunit`
+]
+---
+.left-column[
+  ###@dataProvider
+]
+.right-column[
+###Success
+```remark
+PHPUnit 4.8.21 by Sebastian Bergmann and contributors.
+
+....
+
+Time: 207 ms, Memory: 24.25Mb
+
+OK (4 tests, 4 assertions)
+
+```
+Now, we already now about the assert, first useful test and 
+about the powerful @dataProvider annotation.
+
+]
+---
+template: inverse
+##We don't test protected/private method directly
+####Since anything non-public is only accessible within the scope of the class, we assume that your class's public methods (its API) will interact with them, so in the end you are actually indirectly testing these methods anyway.
+---
+template: inverse
+##But, there is always exception
+---
+.left-column[
+  ###Testing Private Method
+]
+.right-column[
+This is the example private method in our class
+```remark
+/**
+ * Check a value if it a string
+ * @param type $param
+ * @return type
+ */
+private function is_string($param)
+{
+    return is_string($param);
+}   
+```
+And the test case:
+```remark
+public function testIsStringWithIntegerValue()
+{
+    $calc = new App\Http\Controllers\Calculator();
+    $this->assertEquals(is_string("string"), 
+        $calc->is_string("string"));
+} 
+```
+run your `phpunit`
+]
+---
+.left-column[
+  ###Testing Private Method
+]
+.right-column[
+###ERROR
+```remark
+PHPUnit 4.8.21 by Sebastian Bergmann and contributors.
+
+....E
+
+Time: 220 ms, Memory: 24.25Mb
+
+There was 1 error:
+
+1) CalculatorTest::testIsStringWithIntegerValue
+BadMethodCallException: Method [is_string] does not exist.
+
+/home/maryo/gitlab/laravel/bootstrap/cache/compiled.php:8881
+/home/maryo/gitlab/laravel/tests/CalculatorTest.php:43
+/home/maryo/gitlab/laravel/tests/CalculatorTest.php:43
+
+FAILURES!
+Tests: 5, Assertions: 4, Errors: 1.
+
+```
+Of course, because we are testing private method directly
+]
+---
+.left-column[
+  ###Testing Private Method
+]
+.right-column[
+We can use our custom method to test private method directly
+```remark
+public function invokeMethod(&$object, $methodName, 
+    array $parameters = array())
+{
+    $reflection = new \ReflectionClass(get_class($object));
+    $method = $reflection->getMethod($methodName);
+    $method->setAccessible(true);
+
+    return $method->invokeArgs($object, $parameters);
+}
+```
+and then, call our private method
+```remark
+public function testIsStringWithIntegerValue()
+{
+    $calc = new App\Http\Controllers\Calculator();
+    $this->assertEquals(is_string("string"), 
+        $this->invokeMethod($calc, 'is_string', 
+        ['string']));
+}
+```
+Run the test and now we get the result
+]
+---
+.left-column[
+  ###Mock Objects
+]
+.right-column[
+This 
+]
+---
 name: last-page
 template: inverse
 
